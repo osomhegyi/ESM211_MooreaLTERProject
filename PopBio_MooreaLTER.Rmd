@@ -1,0 +1,35 @@
+---
+title: "MooreaLTER_project"
+author: "Olivia Somhegyi"
+date: "2024-02-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(tidyverse)
+library(janitor)
+library(dplyr)
+```
+
+```{r}
+moorea_lter <- read_csv(here('data', 'MCR_LTER_Annual_Fish_Survey_20230615.csv'))
+  
+common_parrotfish_tidy <- moorea_lter %>% 
+  clean_names() %>% 
+  filter(family %in% "Scaridae") %>% 
+  group_by(site) %>% 
+  count(taxonomy) %>% 
+  filter(taxonomy %in% "Scarus psittacus")
+  
+```
+
+
+
+
+
+
+
+
