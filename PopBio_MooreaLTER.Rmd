@@ -12,21 +12,59 @@ library(here)
 library(tidyverse)
 library(janitor)
 library(dplyr)
+library(glarma)
 ```
 
+#cleaning the data
 ```{r}
-moorea_lter <- read_csv(here('data', 'MCR_LTER_Annual_Fish_Survey_20230615.csv'))
-  
-common_parrotfish_tidy <- moorea_lter %>% 
-  clean_names() %>% 
+moorea_lter <- read_csv(here('data', 'MCR_LTER_Annual_Fish_Survey_20230615.csv')) %>% clean_names()
+moorea_lter$year<-as.numeric(moorea_lter$year)
+
+major_events<-read_csv(here("data", "major_events.csv")) 
+
+#just for choosing
+counts_common_parrotfish_tidy <- moorea_lter %>% 
   filter(family %in% "Scaridae") %>% 
   group_by(site) %>% 
   count(taxonomy) %>% 
   filter(taxonomy %in% "Scarus psittacus")
-  
+
+#for glarma
+common_parrotfish<-moorea_lter %>% 
+  filter(taxonomy %in% "Scarus psittacus") %>% 
+  filter(site=="1") %>% 
+  group_by(year) %>% 
+  mutate(annual_count=sum(count)) %>% 
+  select("year", "annual_count") %>% 
+  unique() %>% 
+  inner_join(major_events, by="year")
 ```
 
+Running the glarma
+```{r}
+#Identify variables
+y <- common_parrotfish$annual_count # y value is bison counts
+common_parrotfish$intercept<-as.integer(0)
+x0 <- common_parrotfish %>% select(intercept) 
+x0 <- as.matrix(x0) # turns x0 into a matrix 
 
+#
+x1 <- common_parrotfish %>% select(intercept, major_event_bleaching) # x1 explanatory variables, presence of major events
+x1 <- as.matrix(x1) #turns x1 into a matrix
+
+#without major events
+parrotfish_null_lag_1 <- glarma(y, x0, phiLags = c(1), type = "Poi", method = "FS",
+                              residuals = "Pearson", maxit = 100, grad = 1e-6)
+
+
+#Create the model with major events. Make the lag the same as the best fit model from question 2 
+parrotfish_major_events_lag_1 <- glarma(y, x1, phiLags = c(2), type = "Poi", method = "ML", 
+                             residuals = "Pearson", maxit = 100, grad = 1e-6)
+
+plot.glarma(parrotfish_major_events_lag_1)
+
+summary(parrotfish_major_events_lag_1)
+```
 
 
 
