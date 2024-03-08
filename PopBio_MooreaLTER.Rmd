@@ -30,7 +30,7 @@ counts_common_parrotfish_tidy <- moorea_lter %>%
   filter(taxonomy %in% "Scarus psittacus")
 
 #for glarma
-common_parrotfish<-moorea_lter %>% 
+PF<-moorea_lter %>% 
   filter(taxonomy %in% "Scarus psittacus") %>% 
   filter(site=="1") %>% 
   group_by(year) %>% 
@@ -38,32 +38,90 @@ common_parrotfish<-moorea_lter %>%
   select("year", "annual_count") %>% 
   unique() %>% 
   inner_join(major_events, by="year")
+
+# write.csv(common_parrotfish, here("data", "common_parrotfish_data.csv"))
 ```
 
-Running the glarma
 ```{r}
-#Identify variables
-y <- common_parrotfish$annual_count # y value is bison counts
-common_parrotfish$intercept<-as.integer(0)
-x0 <- common_parrotfish %>% select(intercept) 
-x0 <- as.matrix(x0) # turns x0 into a matrix 
+#Change: the intercept should be 1 not 0
+PF$intercept<-1
+############################################
 
-#
-x1 <- common_parrotfish %>% select(intercept, major_event_bleaching) # x1 explanatory variables, presence of major events
-x1 <- as.matrix(x1) #turns x1 into a matrix
-
-#without major events
-parrotfish_null_lag_1 <- glarma(y, x0, phiLags = c(1), type = "Poi", method = "FS",
-                              residuals = "Pearson", maxit = 100, grad = 1e-6)
+Y.PF<-PF$annual_count
 
 
-#Create the model with major events. Make the lag the same as the best fit model from question 2 
-parrotfish_major_events_lag_1 <- glarma(y, x1, phiLags = c(2), type = "Poi", method = "ML", 
-                             residuals = "Pearson", maxit = 100, grad = 1e-6)
+X.1.PF<-PF |> select(intercept, major_event_crown_of_thorns) # makes a model with crown of thorns event and intercept (1)
 
-plot.glarma(parrotfish_major_events_lag_1)
+  
+#Makes into a matrix
 
-summary(parrotfish_major_events_lag_1)
+X.1.PF<-as.matrix(X.1.PF)
+
+
+
+#SR model 1
+# model with fire events included
+
+glarmamod.1.PF <- glarma(Y.PF, X.1.PF, phiLags = c(1), type = "Poi", method = "FS",
+                         residuals = "Pearson", maxit = 100, grad = 1e-6)
+
+#summary statistics just like getting information out of linear regression
+
+summary(glarmamod.1.PF)
+
+
+#### Modified PF plot for Moorea
+PF_mod<-PF
+
+PF_mod$est<-glarmamod.1.PF$fitted.values #adds the fitted values of the GLARMA model to the data
+
+#plots the model (black) and the species richness data (gray)
+PF_plot_mod<-ggplot(PF_mod, aes(x=year)) + 
+  geom_point(col="gray",aes(y=annual_count),size=3) + 
+  geom_point(col="black",aes(y=est),size=3) +
+  geom_line(col="black",aes(y=est)) +
+  labs(x="Year", y="Parrot Fish Count") +
+  ylim(0,400) + xlim(2005,2023)+
+  theme_bw()
+
+# ggsave(here("plot","Moorea_PF_Glarma_m1.jpg"),PF_plot_mod, dpi=500, width=6, height=3, unit="in")
+
+
+```
+
+
+
+
+Running the glarma(My attempt)
+```{r}
+# #Identify variables
+# y <- common_parrotfish$annual_count # y value is bison counts
+# common_parrotfish$intercept<-as.integer(1)
+# x0 <- common_parrotfish %>% select(intercept) 
+# x0 <- as.matrix(x0) # turns x0 into a matrix 
+# 
+# #
+# x1 <- common_parrotfish %>% select(intercept, major_event_bleaching) # x1 explanatory variables, presence of major events
+# x1 <- as.matrix(x1) #turns x1 into a matrix
+# 
+# #without major events
+# parrotfish_null_lag_1 <- glarma(y, x0, phiLags = c(1), type = "Poi", method = "NR",
+#                               residuals = "Pearson",  maxit = 100, grad = 1e-6)
+# 
+# 
+# #Create the model with major events. Make the lag the same as the best fit model from question 2 
+# parrotfish_major_events_lag_1 <- glarma(y, x1, phiLags = c(2), type = "Poi", method = "NR", 
+#                              residuals = "Pearson", maxit = 100, grad = 1e-6)
+# 
+# plot.glarma(parrotfish_null_lag_1)
+# 
+# summary(parrotfish_null_lag_1)
+```
+
+
+
+```{r}
+
 ```
 
 
