@@ -39,7 +39,25 @@ PF<-moorea_lter %>%
   unique() %>% 
   inner_join(major_events, by="year")
 
-# write.csv(common_parrotfish, here("data", "common_parrotfish_data.csv"))
+PF2<-moorea_lter %>% 
+  filter(taxonomy %in% "Scarus psittacus") %>% 
+  filter(site=="2") %>% 
+  group_by(year) %>% 
+  mutate(annual_count=sum(count)) %>% 
+  select("year", "annual_count") %>% 
+  unique() %>% 
+  inner_join(major_events, by="year")
+
+PF3<-moorea_lter %>% 
+  filter(taxonomy %in% "Scarus psittacus") %>% 
+  filter(site=="3") %>% 
+  group_by(year) %>% 
+  mutate(annual_count=sum(count)) %>% 
+  select("year", "annual_count") %>% 
+  unique() %>% 
+  inner_join(major_events, by="year")
+
+write.csv(PF3, here("data", "common_parrotfish_data_site3.csv"))
 ```
 
 ```{r}
