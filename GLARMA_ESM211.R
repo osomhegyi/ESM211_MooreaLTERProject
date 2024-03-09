@@ -9,10 +9,110 @@ library(tidyverse)
 
 #imports eBird species richness data for Pepperwood Preserve
 # SR<-read.csv(here("data","SR_df.csv"))
-PF<-read.csv(here("data","common_parrotfish_data.csv"))
+PF1<-read.csv(here("data","common_parrotfish_data.csv"))
 PF2<-read.csv(here("data","common_parrotfish_data_site2.csv"))
 PF3<-read.csv(here("data","common_parrotfish_data_site3.csv"))
+PF4<-read.csv(here("data","common_parrotfish_data_site4.csv"))
+PF5<-read.csv(here("data","common_parrotfish_data_site5.csv"))
+PF6<-read.csv(here("data","common_parrotfish_data_site6.csv"))
 
+
+model_business <- function(PF, site_number) {
+  PF$intercept<-1
+  Y.PF<-PF$annual_count
+  
+  X.1.PF<-PF |> select(intercept, major_event_crown_of_thorns) # makes a model with crown of thorns event and intercept (1)
+  X.2.PF<-PF |> select(intercept, major_event_bleaching) # makes a model with crown of thorns event and intercept (1)
+  X.3.PF<-PF |> select(intercept, major_event_cylcone) # makes a model with crown of thorns event and intercept (1)
+  X.4.PF<-PF |> select(intercept, major_event_crown_of_thorns, major_event_bleaching)
+  X.5.PF<-PF |> select(intercept, major_event_cylcone, major_event_bleaching)
+  X.6.PF<-PF |> select(intercept, major_event_cylcone, major_event_crown_of_thorns)
+  X.7.PF<-PF |> select(intercept, major_event_bleaching, major_event_crown_of_thorns, major_event_cylcone) # makes a model with crown of thorns event and intercept (1)
+  
+  X.1.PF<-as.matrix(X.1.PF)
+  X.2.PF<-as.matrix(X.2.PF)
+  X.3.PF<-as.matrix(X.3.PF)
+  X.4.PF<-as.matrix(X.4.PF)
+  X.5.PF<-as.matrix(X.5.PF)
+  X.6.PF<-as.matrix(X.6.PF)
+  X.7.PF<-as.matrix(X.7.PF)
+  
+  glarmamod.1A.PF <- glarma(Y.PF, X.1.PF, phiLags = c(1), type = "Poi", method = "FS",
+                            residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.1B.PF <- glarma(Y.PF, X.1.PF, phiLags = c(2), type = "Poi", method = "FS",
+                            residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.2A.PF <- glarma(Y.PF, X.2.PF, phiLags = c(1), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.2B.PF <- glarma(Y.PF, X.2.PF, phiLags = c(2), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.3A.PF <- glarma(Y.PF, X.3.PF, phiLags = c(1), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.3B.PF <- glarma(Y.PF, X.3.PF, phiLags = c(2), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.4A.PF <- glarma(Y.PF, X.4.PF, phiLags = c(1), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.4B.PF <- glarma(Y.PF, X.4.PF, phiLags = c(2), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.5A.PF <- glarma(Y.PF, X.5.PF, phiLags = c(1), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.5B.PF <- glarma(Y.PF, X.5.PF, phiLags = c(2), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.6A.PF <- glarma(Y.PF, X.6.PF, phiLags = c(1), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.6B.PF <- glarma(Y.PF, X.6.PF, phiLags = c(2), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.7A.PF <- glarma(Y.PF, X.7.PF, phiLags = c(1), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  glarmamod.7B.PF <- glarma(Y.PF, X.7.PF, phiLags = c(2), type = "Poi", method = "FS",
+                           residuals = "Pearson", maxit = 100, grad = 1e-6)
+  
+  sum_1A<-summary(glarmamod.1A.PF)
+  sum_2A<-summary(glarmamod.2A.PF)
+  sum_3A<-summary(glarmamod.3A.PF)
+  sum_4A<-summary(glarmamod.4A.PF)
+  sum_5A<-summary(glarmamod.5A.PF)
+  sum_6A<-summary(glarmamod.6A.PF)
+  sum_7A<-summary(glarmamod.7A.PF)
+  sum_1B<-summary(glarmamod.1B.PF)
+  sum_2B<-summary(glarmamod.2B.PF)
+  sum_3B<-summary(glarmamod.3B.PF)
+  sum_4B<-summary(glarmamod.4B.PF)
+  sum_5B<-summary(glarmamod.5B.PF)
+  sum_6B<-summary(glarmamod.6B.PF)
+  sum_7B<-summary(glarmamod.7B.PF)
+  
+  aic_vector<-c(sum_1A$aic, sum_1B$aic, sum_2A$aic, sum_2B$aic, sum_3A$aic, sum_3B$aic, 
+                sum_4A$aic, sum_4B$aic, sum_5A$aic, sum_5B$aic, sum_6A$aic, sum_6B$aic,
+                sum_7A$aic, sum_7B$aic)
+  model_vector<-c("1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B", "5A", "5B", "6A", "6B", "7A", "7B")
+  result_df <- data.frame(model = model_vector, aic = aic_vector)
+  result_df$site<-site_number
+  
+  return(result_df)
+}
+
+site1_results<-model_business(PF1, 1)
+site2_results<-model_business(PF2, 2) #problem
+site3_results<-model_business(PF3, 3) #problem
+site4_results<-model_business(PF4, 4)
+site5_results<-model_business(PF5, 5)
+site6_results<-model_business(PF6, 6) #problem
+
+
+best_aic_model
+# Find the row with the lowest AIC value
+lowest_aic <- min(site1_results$aic)
+
+# Find AIC values within 7 of the lowest AIC
+close_aic <- site1_results$aic <= (lowest_aic + 7)
+
+# Filter the dataframe to keep rows with the lowest AIC and AIC values within 7 of the lowest AIC
+site1_results_filtered <- site1_results[site1_results$aic == lowest_aic | close_aic, ]
+
+
+
+
+#Manually
 ############################################
 #Change: the intercept should be 1 not 0
 PF$intercept<-1
@@ -63,18 +163,30 @@ glarmamod.1A.PF <- glarma(Y.PF, X.1.PF, phiLags = c(1), type = "Poi", method = "
                          residuals = "Pearson", maxit = 100, grad = 1e-6)
 glarmamod.1B.PF <- glarma(Y.PF, X.1.PF, phiLags = c(2), type = "Poi", method = "FS",
                          residuals = "Pearson", maxit = 100, grad = 1e-6)
-glarmamod.2.PF <- glarma(Y.PF, X.2.PF, phiLags = c(2), type = "Poi", method = "FS",
-                         residuals = "Pearson", maxit = 100, grad = 1e-6)
-glarmamod.3.PF <- glarma(Y.PF, X.3.PF, phiLags = c(2), type = "Poi", method = "FS",
-                         residuals = "Pearson", maxit = 100, grad = 1e-6)
-glarmamod.4.PF <- glarma(Y.PF, X.4.PF, phiLags = c(2), type = "Poi", method = "FS",
-                         residuals = "Pearson", maxit = 100, grad = 1e-6)
-glarmamod.5.PF <- glarma(Y.PF, X.5.PF, phiLags = c(2), type = "Poi", method = "FS",
-                         residuals = "Pearson", maxit = 100, grad = 1e-6)
-glarmamod.6.PF <- glarma(Y.PF, X.6.PF, phiLags = c(2), type = "Poi", method = "FS",
-                         residuals = "Pearson", maxit = 100, grad = 1e-6)
-glarmamod.7.PF <- glarma(Y.PF, X.7.PF, phiLags = c(2), type = "Poi", method = "FS",
-                         residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.2A.PF <- glarma(Y.PF, X.2.PF, phiLags = c(1), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.2B.PF <- glarma(Y.PF, X.2.PF, phiLags = c(2), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.3A.PF <- glarma(Y.PF, X.3.PF, phiLags = c(1), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.3B.PF <- glarma(Y.PF, X.3.PF, phiLags = c(2), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.4A.PF <- glarma(Y.PF, X.4.PF, phiLags = c(1), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.4B.PF <- glarma(Y.PF, X.4.PF, phiLags = c(2), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.5A.PF <- glarma(Y.PF, X.5.PF, phiLags = c(1), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.5B.PF <- glarma(Y.PF, X.5.PF, phiLags = c(2), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.6A.PF <- glarma(Y.PF, X.6.PF, phiLags = c(1), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.6B.PF <- glarma(Y.PF, X.6.PF, phiLags = c(2), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.7A.PF <- glarma(Y.PF, X.7.PF, phiLags = c(1), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
+glarmamod.7B.PF <- glarma(Y.PF, X.7.PF, phiLags = c(2), type = "Poi", method = "FS",
+                          residuals = "Pearson", maxit = 100, grad = 1e-6)
 
 glarmamod.4.PF2 <- glarma(Y.PF2, X.4.PF2, phiLags = c(2), type = "Poi", method = "FS",
                          residuals = "Pearson", maxit = 100, grad = 1e-6)
@@ -84,15 +196,35 @@ glarmamod.4.PF3 <- glarma(Y.PF3, X.4.PF3, phiLags = c(2), type = "Poi", method =
 #summary statistics just like getting information out of linear regression
 # summary(glarmamod.1.SR)
 glarmamod.1A.PF.summary<-summary(glarmamod.1A.PF)
-aic_value <- glarmamod.1A.PF.summary$aic
-summary(glarmamod.1B.PF)
-summary(glarmamod.2.PF)
-summary(glarmamod.3.PF)
+aic_df_1A <- data.frame(Model = "glarmamod.1A.PF", AIC = glarmamod.1A.PF.summary$aic, stringsAsFactors = FALSE)
+
+glarmamod.1B.PF.summary<-summary(glarmamod.1B.PF)
+aic_df_1B <- data.frame(Model = "glarmamod.1B.PF", AIC = glarmamod.1B.PF.summary$aic, stringsAsFactors = FALSE)
+
+glarmamod.2A.PF.summary<-summary(glarmamod.2A.PF)
+aic_df_2A <- data.frame(Model = "glarmamod.2A.PF", AIC = glarmamod.2A.PF.summary$aic, stringsAsFactors = FALSE)
+
+glarmamod.2B.PF.summary<-summary(glarmamod.2B.PF)
+aic_df_2B <- data.frame(Model = "glarmamod.2B.PF", AIC = glarmamod.2B.PF.summary$aic, stringsAsFactors = FALSE)
+
+glarmamod.3A.PF.summary<-summary(glarmamod.3A.PF)
+aic_df_3A <- data.frame(Model = "glarmamod.3A.PF", AIC = glarmamod.3A.PF.summary$aic, stringsAsFactors = FALSE)
+
+glarmamod.3B.PF.summary<-summary(glarmamod.3B.PF)
+aic_df_3B <- data.frame(Model = "glarmamod.3B.PF", AIC = glarmamod.3B.PF.summary$aic, stringsAsFactors = FALSE)
+
+
+aic_vector<-c(glarmamod.1A.PF.summary$aic, glarmamod.1B.PF.summary$aic, glarmamod.2A.PF.summary$aic, glarmamod.2B.PF.summary$aic,
+              glarmamod.3A.PF.summary$aic, glarmamod.3B.PF.summary$aic)
+model_vector<-c("1A", "1B", "2A", "2B", "3A", "3B")
+site1_results <- data.frame(model = model_vector, aic = aic_vector)
+
 summary(glarmamod.4.PF)
 summary(glarmamod.5.PF)
 summary(glarmamod.6.PF)
 summary(glarmamod.7.PF)
 
+combined_df <- rbind(aic_df_1A, aic_df_1B, aic_df_2A, aic_df_2B, aic_df_3A, aic_df_3B)
 
 summary(glarmamod.4.PF2)
 summary(glarmamod.4.PF3)
