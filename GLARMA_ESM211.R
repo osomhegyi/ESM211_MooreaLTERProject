@@ -220,7 +220,7 @@ cyclone_coefficient_fun<-function(input_df){
   
   input_df$major_events <- rownames(input_df)
   rownames(input_df) <- NULL
-  bleaching_coefficient<-input_df[3, ]
+  bleaching_coefficient<-input_df[4, ]
   
 }
 
